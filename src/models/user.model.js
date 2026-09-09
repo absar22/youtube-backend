@@ -49,10 +49,10 @@ const userSchema = new Schema({
 
 // Hash the password before saving using pre middleware using mongoose
 // pre("save") → middleware that runs before MongoDB save
-userSchema.pre("save", async function(next){
-    if(!this.isModified("password")) return next()
+userSchema.pre("save", async function(){
+    if(!this.isModified("password")) return 
     this.password = await bcrypt.hash(this.password,10)
-    next()
+    
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
