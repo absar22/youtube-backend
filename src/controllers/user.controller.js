@@ -54,7 +54,7 @@ const registerUser  = asyncHandler(async (req,res) => {
    }
 
     if(!avatarLocalPath){
-        throw new ApiError(401, 'Avatar is required')
+        throw new ApiError(400, 'Avatar is required')
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
@@ -124,6 +124,21 @@ const loginUser = asyncHandler(async (req,res) => {
 })
 
 
+const logoutUser = asyncHandler(async(req,res) => {
+   await User.findByIdAndUpdate(req.user._id, {
+    $set: {refreshToken: undefined}
+   })
+   const options = {
+     httpOnly: true,
+     secure: true
+   }
+   res.status(200)
+   .clearCookie('accessToken', options)
+   .clearCookie('refreshToken', options)
+   .json(new ApiResponse(200, null, 'Logged out successfully'))
+})
 
 
-export {registerUser, loginUser}
+
+
+export {registerUser, loginUser, logoutUser}
