@@ -146,16 +146,15 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
         throw new ApiError(401, 'Refresh token is required')
     }
     try {
+        //  verify refresh token
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
-        //   check if decodedToken is valid
-        if(!decodedToken){
-            throw new ApiError(401, 'Invalid refresh token')
-        }
-        const user = await User.findById(decodedToken._id).select('-password -refreshToken')
+      
+        // find user from token
+        const user = await User.findById(decodedToken._id)
         if(!user){
             throw new ApiError(404, 'Usesr not found')
         }
-    
+        // compare client token and db token
         if(incomingRefreshToken !== user.refreshToken ){
             throw new ApiError(403, 'Invalid refresh token')
         }
@@ -166,10 +165,9 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
         res.status(200).cookie('accessToken', accessToken, cookiesOptions).cookie('refreshToken', refreshToken, cookiesOptions)
             .json(new ApiResponse(200 , {accessToken,refreshToken}, 'Access token refreshed successfully'))
     } catch (error) {
-        throw new ApiError(500, 'Internal Server Error')
+        throw new ApiError(401, error?.message || "Invalid refresh token")
     }
 
 })
-
 
 export {registerUser, loginUser, logoutUser, refreshAccessToken}
