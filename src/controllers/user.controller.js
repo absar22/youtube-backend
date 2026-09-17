@@ -98,10 +98,12 @@ const loginUser = asyncHandler(async (req,res) => {
 // // send these in cookies
 
  const{username,email,password} = req.body
- if(!username && !email){
-     throw new ApiError(400, 'username or email is required')
+//  if(!username && !email){
+//      throw new ApiError(400, 'username or email is required')
+//  }
+ if(!(username || email)){
+    throw new ApiError(400, 'username or email is required')
  }
- 
 
      const user = await User.findOne({
          $or:[{username}, {email}]
@@ -139,7 +141,8 @@ const logoutUser = asyncHandler(async(req,res) => {
 })
 
 const refreshAccessToken = asyncHandler(async(req,res) => {
-    // i can take token from cookies because there is where i have saved it
+    // i can take token from cookies because there is where i have saved it 
+    // which user is sending 
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
     // is token is not present
     if(!incomingRefreshToken){
@@ -152,18 +155,18 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
         // find user from token
         const user = await User.findById(decodedToken._id)
         if(!user){
-            throw new ApiError(404, 'Usesr not found')
+            throw new ApiError(404, 'User not found')
         }
         // compare client token and db token
         if(incomingRefreshToken !== user.refreshToken ){
-            throw new ApiError(403, 'Invalid refresh token')
+            throw new ApiError(403, 'refresh token is expired ')
         }
   
         // if refresh token is valid genearte a new access and refresh token 
-        const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshToken(user._id)
 
-        res.status(200).cookie('accessToken', accessToken, cookiesOptions).cookie('refreshToken', refreshToken, cookiesOptions)
-            .json(new ApiResponse(200 , {accessToken,refreshToken}, 'Access token refreshed successfully'))
+        return res.status(200).cookie('accessToken', accessToken, cookiesOptions).cookie('refreshToken', newRefreshToken, cookiesOptions)
+            .json(new ApiResponse(200 , {accessToken, newRefreshToken}, 'Access token refreshed successfully'))
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token")
     }
