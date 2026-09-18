@@ -212,12 +212,39 @@ const updateUser = asyncHandler(async(req,res) => {
         email
     }
  },{new:true}).select('-password')
- 
+
     return res
     .status(200)
     .json(new ApiResponse(200, user, "Account details updated successfully"))
 
 })
 
+const updateAvatar = asyncHandler(async(req,res) => {
+    // find local path with the hlep of req.file which is given buy multer 
+     const localAvatarPath =  req?.file?.path
+     if(!localAvatarPath){
+        throw new ApiError(400, 'Avatar file is missing')
+     }
+    //  upload that url to cloudinary
+     const avatar =  await uploadOnCloudinary(localAvatarPath)
+     if(!avatar.url){
+           throw new ApiError(400, 'Error while uploading Avatar')
+     }
+    //  find user to update that url withe help of unique id and req.user which is given by auth middleware
+    const user =  await User.findByIdAndUpdate(req?.user?._id, {
+        $set: {
+            avatar: avatar.url
+        }
+    },{new:true}).select('-password')
 
-export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateUser}
+    // return res
+    return res.status(200).json(new ApiResponse(200, user, 'Avatar changed successfully'))
+})
+
+
+
+
+
+export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, 
+    getCurrentUser, updateUser, updateAvatar
+}
