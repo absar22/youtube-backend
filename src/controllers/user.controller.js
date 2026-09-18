@@ -201,4 +201,23 @@ const getCurrentUser = asyncHandler(async(req,res) => {
     .json(new ApiResponse(200, req.user,'User fetched successfully'))
 })
 
-export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser}
+const updateUser = asyncHandler(async(req,res) => {
+ const {fullname,email} = req.body
+ if(!(fullname || email)){
+    throw new ApiError(400, 'All fields are nesseary')
+ }
+ const user = await User.findByIdAndUpdate(req?.user?._id, {
+    $set:{
+        fullname,
+        email
+    }
+ },{new:true}).select('-password')
+ 
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Account details updated successfully"))
+
+})
+
+
+export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateUser}
