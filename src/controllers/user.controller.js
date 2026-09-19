@@ -84,7 +84,7 @@ const registerUser  = asyncHandler(async (req,res) => {
      }
      
      return res.status(201).json(
-        new ApiResponse(new ApiResponse( 201, createdUser, "User registered Successfully"))
+        new ApiResponse( 201, createdUser, "User registered Successfully")
     )
 
 })
@@ -125,7 +125,7 @@ const loginUser = asyncHandler(async (req,res) => {
     const loggedInUser = await User.findById(user._id).select('-password -refreshToken')
 
    res.status(200).cookie('accessToken', accessToken,cookiesOptions).cookie('refreshToken', refreshToken,cookiesOptions)
-   .json(new ApiResponse(201,  {user: loggedInUser, accessToken, refreshToken}, 'Account logged successfully'))
+   .json(new ApiResponse(200,  {user: loggedInUser, accessToken, refreshToken}, 'Account logged successfully'))
 })
 
 
@@ -256,7 +256,7 @@ const updateCoverImage = asyncHandler(async(req,res) => {
         }
     },{new:true}).select('-password')
 
-    return res.status(200).json(200, user, 'Coverimage updated successfully')
+    return res.status(200).json(200, user, 'Cover image updated successfully')
 })
 
 
