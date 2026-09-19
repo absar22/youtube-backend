@@ -84,7 +84,7 @@ const registerUser  = asyncHandler(async (req,res) => {
      }
      
      return res.status(201).json(
-        new ApiResponse(201, createdUser, "User registered Successfully")
+        new ApiResponse(new ApiResponse( 201, createdUser, "User registered Successfully"))
     )
 
 })
@@ -241,10 +241,28 @@ const updateAvatar = asyncHandler(async(req,res) => {
     return res.status(200).json(new ApiResponse(200, user, 'Avatar changed successfully'))
 })
 
+const updateCoverImage = asyncHandler(async(req,res) => {
+    const localCoverImagePath = req?.file?.path
+    if(!localCoverImagePath){
+        throw new ApiError(400, 'Cover Image is invalid')
+    }
+    const coverImage = await uploadOnCloudinary(localCoverImagePath)
+    if(!coverImage.url){
+           throw new ApiError(400, 'Error while uploading coverimage')
+    }
+    const user = await User.findByIdAndUpdate(req?.user?._id, {
+        $set:{
+            coverImage: coverImage.url
+        }
+    },{new:true}).select('-password')
+
+    return res.status(200).json(200, user, 'Coverimage updated successfully')
+})
+
 
 
 
 
 export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, 
-    getCurrentUser, updateUser, updateAvatar
+    getCurrentUser, updateUser, updateAvatar, updateCoverImage
 }
