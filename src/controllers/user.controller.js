@@ -25,15 +25,6 @@ try {
 }
 
 const registerUser  = asyncHandler(async (req,res) => {
-    // get user details from frontend
-    // validate user details
-    // check if user already exists: using email or username
-    // check for images , checks for avatar
-    // upload to cloudinary
-    // create user in object- create entry in db
-    // remove password and refresh token filed from response
-    // check for user creation 
-    // return res
     const {username,email,fullname, password} = req.body
     console.log(req.body)
 
@@ -285,6 +276,13 @@ const getUserChannelProfile =  asyncHandler(async(req,res) => {
                 },
                 SubscribedTo: {
                     $size: '$subscribedTo'
+                },
+                isSubscribed: {
+                    $cond: {
+                        if: {$in: [req?.user?._id, '$subscribers.subscribe']},
+                        then: true,
+                        else: false
+                    }
                 }
             }
         }
