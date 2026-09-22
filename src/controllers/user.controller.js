@@ -62,7 +62,7 @@ const registerUser  = asyncHandler(async (req,res) => {
     if(!avatarLocalPath){
         throw new ApiError(400, 'Avatar is required')
     }
-
+    //  TODO OLD image to be deleted by using a utility funtion
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
     if(!avatar){
@@ -90,12 +90,6 @@ const registerUser  = asyncHandler(async (req,res) => {
 })
 
 const loginUser = asyncHandler(async (req,res) => {
-// // req body 
-// // username or email
-// // find the usere
-// // password check
-// // refresth token and accesstoken
-// // send these in cookies
 
  const{username,email,password} = req.body
 //  if(!username && !email){
@@ -259,10 +253,44 @@ const updateCoverImage = asyncHandler(async(req,res) => {
     return res.status(200).json(200, user, 'Cover image updated successfully')
 })
 
-
-
-
+const getUserChannelProfile =  asyncHandler(async(req,res) => {
+    const {username} = req.params   // get username from url
+    if(!username?.trim()){
+        throw new ApiError(400, 'username is missing')
+    }
+    const channel = await User.aggregate([
+        {
+          $match:{
+            username: username?.toLowerCase()
+          }  
+        },{
+            $lookup:{
+                from: 'subscriptions',
+                localField: '_id',
+                foreignField:'channel',
+                as: 'subscribers'
+            }
+        }, {
+            $lookup: {
+                from: 'subscriptions',
+                localField: '_id',
+                foreignField:'subscriber',
+                as: 'subscribedTo'
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                  $size: '$subscribers'
+                },
+                SubscribedTo: {
+                    $size: '$subscribedTo'
+                }
+            }
+        }
+    ])
+})
 
 export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, 
-    getCurrentUser, updateUser, updateAvatar, updateCoverImage
+    getCurrentUser, updateUser, updateAvatar, updateCoverImage, getUserChannelProfile
 }
