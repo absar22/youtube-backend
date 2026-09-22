@@ -250,7 +250,7 @@ const updateCoverImage = asyncHandler(async(req,res) => {
         }
     },{new:true}).select('-password')
 
-    return res.status(200).json(200, user, 'Cover image updated successfully')
+    return res.status(200).json(new ApiResponse(200, user, 'Cover image updated successfully'))
 })
 
 const getUserChannelProfile =  asyncHandler(async(req,res) => {
