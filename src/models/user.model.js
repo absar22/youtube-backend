@@ -36,7 +36,14 @@ const userSchema = new Schema({
      }
     },
     coverImage:{
-        type:String,
+        url:{
+            type:String,
+            trim:true
+        },
+        publicId:{
+            type:String,
+            trim:true
+        }
     },
     password:{
         type:String,

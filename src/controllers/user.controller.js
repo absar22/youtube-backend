@@ -69,7 +69,10 @@ const registerUser  = asyncHandler(async (req,res) => {
             publicId: avatar?.public_id
 
         },
-        coverImage: coverImage?.url || ""
+        coverImage: {
+            url: coverImage?.secure_url || '',
+            publicId: coverImage?.public_id || ''
+        }
     })
 
 
@@ -241,8 +244,10 @@ const updateAvatar = asyncHandler(async(req,res) => {
 })
 
 const updateCoverImage = asyncHandler(async(req,res) => {
+    const getUserToDeleteOldCoverImage = await User.findById(req?.user?._id)
+    const oldCoverImagePublicId = getUserToDeleteOldCoverImage?.coverImage?.publicId
     const localCoverImagePath = req?.file?.path
-    if(!localCoverImagePath){
+    if(!localCoverImagePath.secure_url && !localCoverImagePath.publicId){
         throw new ApiError(400, 'Cover Image is invalid')
     }
     const coverImage = await uploadOnCloudinary(localCoverImagePath)
@@ -251,9 +256,15 @@ const updateCoverImage = asyncHandler(async(req,res) => {
     }
     const user = await User.findByIdAndUpdate(req?.user?._id, {
         $set:{
-            coverImage: coverImage.url
+            coverImage: {
+                url: coverImage?.secure_url,
+                publicId: coverImage?.public_id
+            }
         }
     },{new:true}).select('-password')
+    if(oldCoverImagePublicId){
+        await deleteAsset(oldCoverImagePublicId)
+    }
 
     return res.status(200).json(new ApiResponse(200, user, 'Cover image updated successfully'))
 })
@@ -319,6 +330,21 @@ const getUserChannelProfile =  asyncHandler(async(req,res) => {
 })
 
 const getWatchHistory = asyncHandler(async(req,res) => {
+ 
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id : new mongoose.Types.ObjectId(req.user._id)
+      }  
+    },
+    // $lookup:{
+    //     from:
+    //     localField:
+    //     foreignField:
+    //     as:
+    // }
+])
+
 
     
 })
