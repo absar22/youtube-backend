@@ -112,6 +112,6 @@ The server will start using Nodemon.
 
 Status
 
-🚧 This project is currently under development.
+This project is currently under development.
 
 I'm building it step by step while learning production-style backend development with Node.js, Express.js, MongoDB, and related technologies.

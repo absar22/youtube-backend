@@ -1,7 +1,7 @@
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/apiError.js'
 import {User} from '../models/user.model.js'
-import uploadOnCloudinary from '../utils/cloudinary.js'
+import {deleteAsset, uploadOnCloudinary }from '../utils/cloudinary.js'
 import { ApiResponse } from '../utils/apiResponse.js'
 import jwt from "jsonwebtoken"
 
@@ -64,7 +64,11 @@ const registerUser  = asyncHandler(async (req,res) => {
         email,
         fullname,
         password,
-        avatar: avatar?.url,
+        avatar: {
+            url: avatar?.secure_url,
+            publicId: avatar?.public_id
+
+        },
         coverImage: coverImage?.url || ""
     })
 
@@ -205,6 +209,8 @@ const updateUser = asyncHandler(async(req,res) => {
 })
 
 const updateAvatar = asyncHandler(async(req,res) => {
+    const getUserToDeleteOldAvatar = await User.findById(req?.user?._id)
+    const oldAvatarPublicId = getUserToDeleteOldAvatar?.avatar?.publicId
     // find local path with the hlep of req.file which is given buy multer 
      const localAvatarPath =  req?.file?.path
      if(!localAvatarPath){
@@ -212,15 +218,23 @@ const updateAvatar = asyncHandler(async(req,res) => {
      }
     //  upload that url to cloudinary
      const avatar =  await uploadOnCloudinary(localAvatarPath)
-     if(!avatar.url){
+     if(!avatar.secure_url && !avatar.public_id){
            throw new ApiError(400, 'Error while uploading Avatar')
      }
     //  find user to update that url withe help of unique id and req.user which is given by auth middleware
     const user =  await User.findByIdAndUpdate(req?.user?._id, {
         $set: {
-            avatar: avatar.url
+            avatar: {
+                url: avatar?.secure_url,
+                publicId: avatar?.public_id
+            }
         }
     },{new:true}).select('-password')
+    if(oldAvatarPublicId){
+        const deleteResults = await deleteAsset(oldAvatarPublicId)
+        console.log('Cloudinary results',deleteResults)
+        console.log('pubicid', oldAvatarPublicId)
+    }
 
     // return res
     return res.status(200).json(new ApiResponse(200, user, 'Avatar changed successfully'))
@@ -304,6 +318,11 @@ const getUserChannelProfile =  asyncHandler(async(req,res) => {
     return res.status(200).json(new ApiResponse(200, channel[0], 'User channel fetched successfully'))
 })
 
+const getWatchHistory = asyncHandler(async(req,res) => {
+
+    
+})
+
 export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, 
-    getCurrentUser, updateUser, updateAvatar, updateCoverImage, getUserChannelProfile
+    getCurrentUser, updateUser, updateAvatar, updateCoverImage, getUserChannelProfile, getWatchHistory
 }
