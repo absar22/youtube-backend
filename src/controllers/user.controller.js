@@ -221,7 +221,7 @@ const updateAvatar = asyncHandler(async(req,res) => {
      }
     //  upload that url to cloudinary
      const avatar =  await uploadOnCloudinary(localAvatarPath)
-     if(!avatar.secure_url && !avatar.public_id){
+     if(!avatar.secure_url || !avatar.public_id){
            throw new ApiError(400, 'Error while uploading Avatar')
      }
     //  find user to update that url withe help of unique id and req.user which is given by auth middleware
@@ -247,11 +247,12 @@ const updateCoverImage = asyncHandler(async(req,res) => {
     const getUserToDeleteOldCoverImage = await User.findById(req?.user?._id)
     const oldCoverImagePublicId = getUserToDeleteOldCoverImage?.coverImage?.publicId
     const localCoverImagePath = req?.file?.path
-    if(!localCoverImagePath.secure_url && !localCoverImagePath.publicId){
+    if(!localCoverImagePath){
         throw new ApiError(400, 'Cover Image is invalid')
     }
+    
     const coverImage = await uploadOnCloudinary(localCoverImagePath)
-    if(!coverImage.url){
+    if(!coverImage?.secure_url || !coverImage?.public_id){
            throw new ApiError(400, 'Error while uploading coverimage')
     }
     const user = await User.findByIdAndUpdate(req?.user?._id, {
