@@ -346,7 +346,26 @@ const getWatchHistory = asyncHandler(async(req,res) => {
             pipeline: [
                 {
                     $lookup: {
-                    // owner lookup — next step
+                    // owner lookup 
+                    from:'users',
+                    localField:'owner',
+                    foreignField:'_id',
+                    as:'owner',
+                    pipeline: [
+                        {
+                            $project: {
+                                fullname:1,
+                                username:1,
+                                avatar:1
+                            }
+                        }
+                    ]
+                    }
+                },{
+                    $addFields: {
+                        owner: {
+                            $first: '$owner'
+                        }
                     }
                 }
             ]
@@ -354,6 +373,11 @@ const getWatchHistory = asyncHandler(async(req,res) => {
     }
 
 ])
+if (!user.length) {
+    throw new ApiError(404, 'User not found')
+}
+
+return res.status(200).json(new ApiResponse(200, user[0], 'Watch history fetched successfully'))
 
 
     
