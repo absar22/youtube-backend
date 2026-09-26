@@ -240,7 +240,7 @@ const updateAvatar = asyncHandler(async(req,res) => {
     }
 
     // return res
-    return res.status(200).json(new ApiResponse(200, user, 'Avatar changed successfully'))
+    return res.status(200).json(new ApiResponse(200, user.avatar, 'Avatar changed successfully'))
 })
 
 const updateCoverImage = asyncHandler(async(req,res) => {
@@ -267,7 +267,7 @@ const updateCoverImage = asyncHandler(async(req,res) => {
         await deleteAsset(oldCoverImagePublicId)
     }
 
-    return res.status(200).json(new ApiResponse(200, user, 'Cover image updated successfully'))
+    return res.status(200).json(new ApiResponse(200, user.coverImage, 'Cover image updated successfully'))
 })
 
 const getUserChannelProfile =  asyncHandler(async(req,res) => {
@@ -337,13 +337,15 @@ const getWatchHistory = asyncHandler(async(req,res) => {
       $match: {
         _id : new mongoose.Types.ObjectId(req.user._id)
       }  
-    },
-    // $lookup:{
-    //     from:
-    //     localField:
-    //     foreignField:
-    //     as:
-    // }
+    },{
+        $lookup:{
+            from:'videos',
+            localField:'watchHistory',
+            foreignField:'_id',
+            as:'watchHistory'
+        }
+    }
+
 ])
 
 
