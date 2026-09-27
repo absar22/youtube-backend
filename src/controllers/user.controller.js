@@ -124,7 +124,11 @@ const loginUser = asyncHandler(async (req,res) => {
 
 const logoutUser = asyncHandler(async(req,res) => {
    await User.findByIdAndUpdate(req.user._id, {
-    $set: {refreshToken: undefined}
+    // $set: {refreshToken: undefined}   // this worked but i used $unset
+    // $unset to completely remove fields from MongoDB documents
+    $unset: {
+        refreshToken : 1
+    }
    })
  
    res.status(200)
@@ -378,9 +382,7 @@ if (!user.length) {
     throw new ApiError(404, 'User not found')
 }
 
-return res.status(200).json(new ApiResponse(200, user[0], 'Watch history fetched successfully'))
-
-
+return res.status(200).json(new ApiResponse(200, user[0].watchHistory, 'Watch history fetched successfully'))
     
 })
 
