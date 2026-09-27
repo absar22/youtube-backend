@@ -6,7 +6,25 @@ import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const createTweet = asyncHandler(async (req, res) => {
-    //TODO: create tweet
+    // first se if the person is logged in or not 
+     const user = await User.findById(req?.user?._id)
+     if(!user){
+        throw new ApiError(400, 'User not exist')
+     }
+     const {content } = req.body
+     if(!content){
+        throw new ApiError(400, 'Please enter the content')
+     }
+     const createTweet = await Tweet.create({
+        content,
+        owner: user._id
+     },
+)
+    const createdTweet =  await Tweet.findById(createTweet._id)
+    if(!createdTweet){
+        throw new ApiError(500, "Error fetching user's tweet")
+    }
+    return res.status(201).json(new ApiResponse(201, createdTweet, 'You tweeted '))
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
@@ -21,9 +39,4 @@ const deleteTweet = asyncHandler(async (req, res) => {
     //TODO: delete tweet
 })
 
-export {
-    createTweet,
-    getUserTweets,
-    updateTweet,
-    deleteTweet
-}
+export {createTweet,getUserTweets,updateTweet,deleteTweet}
