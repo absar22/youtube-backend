@@ -46,7 +46,19 @@ const getUserTweets = asyncHandler(async (req, res) => {
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
-    //TODO: update tweet
+    const {content} = req.body
+    if(!content){
+        throw new ApiError(400, 'Please put content')
+    }
+   const editedTweet = await Tweet.findByIdAndUpdate(req?.params?.tweetId, {
+    $set: {
+        content
+    }
+   })
+   if(!editedTweet){
+    throw new ApiError(400, 'User not existed')
+   }
+   return res.status(201).json(new ApiResponse(201, editedTweet.content, 'Tweet edited successfully'))
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
