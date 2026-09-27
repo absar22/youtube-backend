@@ -7,7 +7,10 @@ import jwt from "jsonwebtoken"
 import mongoose from 'mongoose'
 
 const cookiesOptions = {
-    httpOnly: true,
+    // true prevents client-side JavaScript from reading the cookie, 
+    // which helps protect session/JWT cookies if an XSS vulnerability exists.
+    //  secure: true ensures the browser only sends that cookie over HTTPS
+    httpOnly: true,  
     secure: true
 }
 
