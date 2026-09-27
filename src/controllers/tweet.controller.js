@@ -28,6 +28,9 @@ const createTweet = asyncHandler(async (req, res) => {
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
+    if(!isValidObjectId(req.params.userId)){
+       throw new ApiError(400, "Invalid user ID")
+    }
     const findTweets = await Tweet.find({
         owner: req.params.userId
     })
@@ -50,6 +53,9 @@ const updateTweet = asyncHandler(async (req, res) => {
     if(!content){
         throw new ApiError(400, 'Please put content')
     }
+    if(!isValidObjectId(req?.params?.tweetId)){
+        throw new ApiError(400, "Invalid tweet ID")
+    }
    const editedTweet = await Tweet.findByIdAndUpdate(req?.params?.tweetId, {
     $set: {
         content
@@ -62,6 +68,9 @@ const updateTweet = asyncHandler(async (req, res) => {
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
+    if(!isValidObjectId(req?.params?.tweetId)){
+        throw new ApiError(400, "Invalid tweet ID")
+    }
     const deleteTweet = await Tweet.findByIdAndDelete(req?.params?.tweetId)
     if(!deleteTweet){
         throw new ApiError(404, 'No tweet found')
