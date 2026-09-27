@@ -54,11 +54,11 @@ const updateTweet = asyncHandler(async (req, res) => {
     $set: {
         content
     }
-   })
+   }, {new:true})
    if(!editedTweet){
-    throw new ApiError(400, 'User not existed')
+    throw new ApiError(404, 'Tweet not found')
    }
-   return res.status(201).json(new ApiResponse(201, editedTweet.content, 'Tweet edited successfully'))
+   return res.status(200).json(new ApiResponse(200, editedTweet.content, 'Tweet edited successfully'))
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
