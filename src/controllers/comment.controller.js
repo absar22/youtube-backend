@@ -1,8 +1,9 @@
-import mongoose from "mongoose"
+import mongoose,  { isValidObjectId }from "mongoose"
 import {Comment} from "../models/comment.model.js"
 import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
+
 
 const getVideoComments = asyncHandler(async (req, res) => {
     //TODO: get all comments for a video
@@ -34,6 +35,9 @@ const updateComment = asyncHandler(async (req, res) => {
  if(!content){
     throw new ApiError(400,'Content is required')
  }
+ if(!isValidObjectId(req?.params?.commentId)){
+    throw new ApiError(400, 'Invalid comment')
+ }
  const updateComment = await Comment.findByIdAndUpdate(req?.params?.commentId, {
     $set: {
         content
@@ -48,7 +52,14 @@ const updateComment = asyncHandler(async (req, res) => {
    
 
 const deleteComment = asyncHandler(async (req, res) => {
-    // TODO: delete a comment
+    if(!isValidObjectId(req?.params?.commentId)){
+        throw new ApiError(400, 'Invalid comment')
+    }
+    const deleteComment = await Comment.findByIdAndDelete(req?.params?.commentId)
+    if(!deleteComment){
+        throw new ApiError(500,'Tweet cannot delete due to server error')
+    } 
+    return res.status(200).json(new ApiResponse(200, {}, 'Comment deleted'))
 })
 
 export {getVideoComments, addComment, updateComment,deleteComment}
