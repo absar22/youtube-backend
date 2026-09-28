@@ -4,6 +4,7 @@ import {User }from "../models/user.model.js"
 import {ApiError} from '../utils/apiError.js'
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import { ApiResponse } from "../utils/apiResponse.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
@@ -13,7 +14,40 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description} = req.body
-    // TODO: get video, upload to cloudinary, create video
+    if([title,description].some((fields) => fields?.trim() === '')){
+        throw new ApiError(400,'All feilds are requied')
+    }
+    const videoLocalPath = req?.files?.videoFile[0]?.path
+    const thumbnailLocalPath = req?.files?.thumbnail[0]?.path
+
+      if (!videoLocalPath || !thumbnailLocalPath) {
+        throw new ApiError(400, 'Video and thumbnail are required')
+    }
+    const videoFile = await uploadOnCloudinary(videoLocalPath)
+    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
+     if (!videoFile || !thumbnail) {
+    throw new ApiError(400, 'Video and thumbnail are not uploaded properly')
+}
+    const publishVideo = await Video.create({
+        videoFile: {
+            url: videoFile.secure_url,
+            publicId: videoFile.public_id
+        },thumbnail:{
+            url: thumbnail.secure_url,
+            publicId:thumbnail.public_id
+        },
+        owner: req?.user?._id,
+        duration: videoFile.duration,
+        title,
+        description,
+    })
+
+    const publisedVideo = await Video.findById(publishVideo._id)
+    if(!publisedVideo){
+        throw new ApiError(500, 'Error publishing video')
+    }
+    return res.status(200).json(new ApiResponse(200, publisedVideo, 'Video publised successuflly'))
+
 })
 
 const getVideoById = asyncHandler(async (req, res) => {

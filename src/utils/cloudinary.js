@@ -36,5 +36,9 @@ const deleteAsset = async (publicId, resourceType = 'image') => {
   return result;
 };
 
+const deleteVideo = async(publicId) => {
+  return deleteAsset(publicId,'video')
+}
 
-export {uploadOnCloudinary, deleteAsset}
+
+export {uploadOnCloudinary, deleteAsset, deleteVideo}
