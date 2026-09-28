@@ -52,8 +52,20 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: get video by id
+    if(!videoId){
+        throw new ApiError(400,'VideoId required')
+    }
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400,'Invalid videoId')
+    }
+    const videoIdUrl = await Video.findById(videoId)
+    if(!videoIdUrl){
+        throw new ApiError(404,'Video not found')
+    }
+    return res.status(200).json(new ApiResponse(200, videoIdUrl, 'Video fetched Successfully'))
+
 })
+
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
@@ -70,11 +82,4 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 })
 
-export {
-    getAllVideos,
-    publishAVideo,
-    getVideoById,
-    updateVideo,
-    deleteVideo,
-    togglePublishStatus
-}
+export {getAllVideos,publishAVideo,getVideoById,updateVideo,deleteVideo,togglePublishStatus}
