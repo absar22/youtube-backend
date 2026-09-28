@@ -66,7 +66,6 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 })
 
-
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: update video details like title, description, thumbnail

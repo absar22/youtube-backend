@@ -14,14 +14,19 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
 const addComment = asyncHandler(async (req, res) => {
     const {content}= req.body
+    const {videoId}= req.params
     if(!content){
         throw new ApiError(400, 'Invalid content')
+    }
+     if(!isValidObjectId(videoId)){
+        throw new ApiError(400, 'Invalid videoId')
     }
     const createComment = await Comment.create({
         content,
          owner: req.user._id,
          video:req.params.videoId
     })
+   
     const createdComment = await Comment.findById(createComment._id)
     if(!createdComment){
         throw new ApiError(500, 'Error fetching comment')
@@ -32,12 +37,14 @@ const addComment = asyncHandler(async (req, res) => {
 
 const updateComment = asyncHandler(async (req, res) => {
  const {content}=req.body
+ const {commentId}=req.params
  if(!content){
-    throw new ApiError(400,'Content is required')
+    throw new ApiError(404,'Content not found')
  }
- if(!isValidObjectId(req?.params?.commentId)){
+ if(!isValidObjectId(commentId)){
     throw new ApiError(400, 'Invalid comment')
  }
+ 
  const updateComment = await Comment.findByIdAndUpdate(req?.params?.commentId, {
     $set: {
         content
@@ -47,18 +54,21 @@ const updateComment = asyncHandler(async (req, res) => {
  if(!updateComment){
     throw new ApiError(500, 'Server down')
  }
+ 
  return res.status(200).json(new ApiResponse(200, updateComment,'Comment updated'))
 })
    
 
 const deleteComment = asyncHandler(async (req, res) => {
-    if(!isValidObjectId(req?.params?.commentId)){
+    const {commentId}= req.params
+     if(!isValidObjectId(commentId)){
         throw new ApiError(400, 'Invalid comment')
     }
     const deleteComment = await Comment.findByIdAndDelete(req?.params?.commentId)
     if(!deleteComment){
-        throw new ApiError(500,'Tweet cannot delete due to server error')
+        throw new ApiError(404,'comment cannot found')
     } 
+       
     return res.status(200).json(new ApiResponse(200, {}, 'Comment deleted'))
 })
 
