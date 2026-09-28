@@ -30,8 +30,22 @@ const addComment = asyncHandler(async (req, res) => {
 })
 
 const updateComment = asyncHandler(async (req, res) => {
-    // TODO: update a comment
+ const {content}=req.body
+ if(!content){
+    throw new ApiError(400,'Content is required')
+ }
+ const updateComment = await Comment.findByIdAndUpdate(req?.params?.commentId, {
+    $set: {
+        content
+    }
+ }, {new:true})
+
+ if(!updateComment){
+    throw new ApiError(500, 'Server down')
+ }
+ return res.status(200).json(new ApiResponse(200, updateComment,'Comment updated'))
 })
+   
 
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment

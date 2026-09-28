@@ -325,7 +325,7 @@ The project is actively being developed. Planned/ongoing features include:
 * Search and filtering
 * Pagination across resources
 
-## 🎯 Goal
+## Goal
 
 The goal of this project is to build a production-style backend while strengthening practical knowledge of **Node.js, Express, MongoDB, Mongoose, authentication, file handling, cloud storage, and backend architecture**.
 
