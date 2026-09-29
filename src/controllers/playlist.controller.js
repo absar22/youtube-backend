@@ -34,7 +34,24 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 })
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
+   
     const {playlistId, videoId} = req.params
+    if(!playlistId || !videoId && !videos){
+        throw new ApiError(400,'Video and playlist Id required')
+    }
+    if(!isValidObjectId(playlistId) && !isValidObjectId(videoId)){
+        throw new ApiError(400,'No valid Id')
+    }
+    const addVideo = await Playlist.findByIdAndUpdate(playlistId,{
+          $addToSet: { // addtoSet is basical if not persendt then only add not liek $push
+            videos:videoId
+          }
+    },{new:true})
+    console.log('Video',addVideo)
+    if(!addVideo){
+        throw new ApiError(404,'Video Not found')
+    }
+    return res.status(200).json(new ApiResponse(200,addVideo,'Video added successfully'))
 })
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
