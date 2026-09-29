@@ -39,7 +39,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     if(!playlistId || !videoId && !videos){
         throw new ApiError(400,'Video and playlist Id required')
     }
-    if(!isValidObjectId(playlistId) && !isValidObjectId(videoId)){
+    if(!isValidObjectId(playlistId) || !isValidObjectId(videoId)){
         throw new ApiError(400,'No valid Id')
     }
     const addVideo = await Playlist.findByIdAndUpdate(playlistId,{
@@ -47,7 +47,6 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
             videos:videoId
           }
     },{new:true})
-    console.log('Video',addVideo)
     if(!addVideo){
         throw new ApiError(404,'Video Not found')
     }
@@ -56,7 +55,21 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
-    // TODO: remove video from playlist
+    if(!playlistId || !videoId){
+        throw new ApiError(400,'All fields required')
+    }
+    if(!isValidObjectId(playlistId) || !isValidObjectId(videoId)){
+        throw new ApiError(400,'Invalid playlist or video Id')
+    }
+    const deleteVideo = await Playlist.findByIdAndDelete(playlistId,{
+        $pull: {
+            videos:videoId
+        }
+    })
+    if(!deleteVideo){
+        throw new ApiError(404,'Video not found')
+    }
+    return res.status(200).json(new ApiResponse(200, deleteVideo, 'Video deleted successfulyl from playlist'))
 
 })
 
