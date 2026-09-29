@@ -3,7 +3,7 @@ import {Video} from "../models/video.model.js"
 import {User }from "../models/user.model.js"
 import {ApiError} from '../utils/apiError.js'
 import {asyncHandler} from "../utils/asyncHandler.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import {uploadOnCloudinary,deleteAsset} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 
 
@@ -68,13 +68,55 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: update video details like title, description, thumbnail
-
+    const {title, description} = req.body
+    if(!videoId){
+        throw new ApiError(400,'VideoId is required')
+    }
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400,'Invalid videoId')
+    }
+    const video = await Video.findById(videoId)
+    if(!video){
+        throw new ApiError(404,'Video not found')
+    }
+    const thumbnailPublicId = video?.thumbnail?.publicId
+    const localThumbnailPath = req?.file?.path
+     if(!localThumbnailPath){
+      throw new ApiError(400,'No thumbnail file path added') 
+    }
+    const thumbnail = await uploadOnCloudinary(localThumbnailPath)
+    if(!thumbnail.secure_url || !thumbnail.public_id){
+        throw new ApiError(400, 'Cannot upload thumbnail')
+    }
+    const updateVideo = await Video.findByIdAndUpdate(videoId, {
+        $set: {
+            title,
+            description,
+            thumbnail: {
+                url:thumbnail.secure_url,
+                publicId:thumbnail.public_id
+            }
+        }
+    },{new:true})
+    if(!updateVideo){
+        throw new ApiError(404,'Video not found')
+    }
+    if(thumbnailPublicId){
+      await deleteAsset(thumbnailPublicId)
+    }
+    return res.status(200).json(new ApiResponse(200,updateVideo,'video update successfull'))
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: delete video
+    if(!videoId){
+        throw new ApiError(400,'VideoId is required')
+    }
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400,'Invalid videoId')
+    }
+
+    
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
