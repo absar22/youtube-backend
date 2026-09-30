@@ -14,6 +14,8 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     if(!isValidObjectId(channelId)){
         throw new ApiError(400,'Invalid ChannelId')
     }
+    // TODO: Add compound unique index on subscriber + channel
+// to prevent duplicate subscriptions at the database level later
     const isSubscribed = await Subscription.findOne({
           subscriber:req?.user?._id,
           channel: channelId
@@ -37,6 +39,41 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {channelId} = req.params
+    if(!channelId){
+        throw new ApiError(400,'channelId required')
+    }
+    if(!isValidObjectId(channelId)){
+        throw new ApiError(400,'Invalid ChannelId')
+    }
+
+    const getSubscriber = await Subscription.aggregate([
+        {
+            $match: {
+                  channel:new mongoose.Types.ObjectId(channelId)
+            }
+        },
+        {
+            $lookup: {
+                from:'users',
+                localField:'subscriber',
+                foreignField:'_id',
+                as:'subscriberInfo'
+            }
+        },
+        {
+            $project:{
+                "subscriberInfo.username": 1,
+                "subscriberInfo.createdAt":1
+                
+            }
+        }
+    ])
+    // TODO: Check whether channel exists separately
+// so an empty subscriber list doesn't mean channel not found
+    if(!getSubscriber?.length){
+        throw new ApiError(404, 'channel doesnt exist')
+    }
+    return res.status(200).json(new ApiResponse(200, getSubscriber,'User channedl fetched successfully'))
 })
 
 // controller to return channel list to which user has subscribed
