@@ -71,7 +71,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     if(!isValidObjectId(playlistId) || !isValidObjectId(videoId)){
         throw new ApiError(400,'Invalid playlist or video Id')
     }
-    const deleteVideo = await Playlist.findByIdAndDelete(playlistId,{
+    const deleteVideo = await Playlist.findByIdAndUpdate(playlistId,{
         $pull: {
             videos:videoId
         }
