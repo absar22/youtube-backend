@@ -25,7 +25,17 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const {userId} = req.params
-    //TODO: get user playlists
+    if(!userId){
+        throw new ApiError(400,'UserId is required')
+    }
+    if(!isValidObjectId(userId)){
+        throw new ApiError(400,'Invalid userID')
+    }
+    const userPlaylist = await Playlist.find({owner:userId})
+    // if(userPlaylist.length === 0){
+    //     throw new ApiError(404,'No playlist for this user')
+    // }
+    return res.status(200).json(new ApiResponse(200,userPlaylist,'User playlist fetcched successfully'))
 })
 
 const getPlaylistById = asyncHandler(async (req, res) => {
@@ -36,7 +46,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
    
     const {playlistId, videoId} = req.params
-    if(!playlistId || !videoId && !videos){
+    if(!playlistId || !videoId ){
         throw new ApiError(400,'Video and playlist Id required')
     }
     if(!isValidObjectId(playlistId) || !isValidObjectId(videoId)){
@@ -112,12 +122,6 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200,update,'Playlist updated successfully'))
 })
 
-export {
-    createPlaylist,
-    getUserPlaylists,
-    getPlaylistById,
-    addVideoToPlaylist,
-    removeVideoFromPlaylist,
-    deletePlaylist,
-    updatePlaylist
+export {createPlaylist,getUserPlaylists,getPlaylistById,addVideoToPlaylist,removeVideoFromPlaylist,
+    deletePlaylist,updatePlaylist
 }
