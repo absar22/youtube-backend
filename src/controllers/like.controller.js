@@ -25,9 +25,4 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
 })
 
-export {
-    toggleCommentLike,
-    toggleTweetLike,
-    toggleVideoLike,
-    getLikedVideos
-}
+export {toggleCommentLike,toggleTweetLike,toggleVideoLike,getLikedVideos}
