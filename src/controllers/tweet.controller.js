@@ -12,11 +12,11 @@ const createTweet = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'User not exist')
      }
      const {content } = req.body
-     if(!content){
+     if(!content?.trim()){
         throw new ApiError(400, 'Please enter the content')
      }
      const createTweet = await Tweet.create({
-        content,
+        content:content.trim(),
         owner: user._id
      },
 )
@@ -50,17 +50,27 @@ const getUserTweets = asyncHandler(async (req, res) => {
 
 const updateTweet = asyncHandler(async (req, res) => {
     const {content} = req.body
-    if(!content){
+    const {tweetId}= req.params
+    if(!content?.trim()){
         throw new ApiError(400, 'Please put content')
     }
-    if(!isValidObjectId(req?.params?.tweetId)){
+    if(!isValidObjectId(tweetId)){
         throw new ApiError(400, "Invalid tweet ID")
     }
-   const editedTweet = await Tweet.findByIdAndUpdate(req?.params?.tweetId, {
-    $set: {
-        content
-    }
-   }, {new:true})
+   const editedTweet = await Tweet.findOneAndUpdate(
+        {
+            _id:tweetId,
+            owner:req.user._id
+        },
+        {
+            $set: {
+                content:content.trim()
+            }
+        },{
+            new:true,
+            runValidators:true
+        }
+   )
    if(!editedTweet){
     throw new ApiError(404, 'Tweet not found')
    }
@@ -68,10 +78,16 @@ const updateTweet = asyncHandler(async (req, res) => {
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
-    if(!isValidObjectId(req?.params?.tweetId)){
+    const {tweetId}= req.params
+    if(!isValidObjectId(tweetId)){
         throw new ApiError(400, "Invalid tweet ID")
     }
-    const deleteTweet = await Tweet.findByIdAndDelete(req?.params?.tweetId)
+    const deleteTweet = await Tweet.findOneAndDelete(
+        {
+            _id:tweetId,
+            owner:req.user._id
+        }
+    )
     if(!deleteTweet){
         throw new ApiError(404, 'No tweet found')
     }
