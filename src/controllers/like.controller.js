@@ -4,6 +4,7 @@ import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { Video } from "../models/video.model.js"
+import { Comment } from "../models/comment.model.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const {videoId} = req.params
@@ -38,7 +39,33 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const {commentId} = req.params
-    //TODO: toggle like on comment
+    if(!commentId){
+        throw new ApiError(400,'CommentId is requierd')
+    }
+    if(!isValidObjectId(commentId)){
+        throw new ApiError('Invaid commentId')
+    }
+    const comment = await Comment.findById(commentId)
+    if(!comment){
+        throw new ApiError(404,'No comment found')
+    }
+    const commentLike = await Like.findOne({
+        comment:commentId,
+        likedBy:req?.user?._id
+    })
+    if(!commentLike){
+        const like = await Like.create({
+        comment:commentId,
+        likedBy:req?.user?._id
+        })
+        return res.status(201).json(new ApiResponse(201,like,'Liked commment'))
+    }else{
+        await Like.deleteOne({
+        comment:commentId,
+        likedBy:req?.user?._id
+        })
+        return res.status(200).json(new ApiResponse(200,{},'delete like '))
+    }
 
 })
 
