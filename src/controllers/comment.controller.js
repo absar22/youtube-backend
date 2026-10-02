@@ -78,7 +78,7 @@ const updateComment = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Invalid comment')
  }
  
- const updateComment = await Comment.findOneAndUpdate(
+ const updatedComment = await Comment.findOneAndUpdate(
         {
             _id: commentId,
             owner:req.user._id
@@ -93,11 +93,11 @@ const updateComment = asyncHandler(async (req, res) => {
             runValidators:true
 
         })
- if(!updateComment){
+ if(!updatedComment){
     throw new ApiError(404, 'comment not found')
  }
  
- return res.status(200).json(new ApiResponse(200, updateComment,'Comment updated'))
+ return res.status(200).json(new ApiResponse(200, updatedComment,'Comment updated'))
 })
    
 
@@ -111,7 +111,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     }
     const deleteComment = await Comment.findOneAndDelete({
         _id:commentId,
-        owner:req?.user?._id
+        owner:req.user._id
     })
     if(!deleteComment){
         throw new ApiError(404,'comment cannot found')
