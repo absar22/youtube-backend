@@ -48,16 +48,16 @@ const getVideoComments = asyncHandler(async (req, res) => {
 const addComment = asyncHandler(async (req, res) => {
     const {content}= req.body
     const {videoId}= req.params
-    if(!content){
+    if(!content?.trim()){
         throw new ApiError(400, 'Invalid content')
     }
      if(!isValidObjectId(videoId)){
         throw new ApiError(400, 'Invalid videoId')
     }
     const createComment = await Comment.create({
-        content,
+        content:content.trim(),
          owner: req.user._id,
-         video:req.params.videoId
+         video:videoId
     })
    
     const createdComment = await Comment.findById(createComment._id)
@@ -71,7 +71,7 @@ const addComment = asyncHandler(async (req, res) => {
 const updateComment = asyncHandler(async (req, res) => {
  const {content}=req.body
  const {commentId}=req.params
- if(!content.trim()){
+ if(!content?.trim()){
     throw new ApiError(400,'Content not found')
  }
  if(!isValidObjectId(commentId)){
@@ -84,7 +84,7 @@ const updateComment = asyncHandler(async (req, res) => {
             owner:req.user._id
         },
         {
-            set:{ 
+            $set:{ 
                 content : content.trim()
             }
         },
@@ -103,10 +103,16 @@ const updateComment = asyncHandler(async (req, res) => {
 
 const deleteComment = asyncHandler(async (req, res) => {
     const {commentId}= req.params
+    if(!commentId){
+        throw new ApiError(400,'commentID is required')
+    }
      if(!isValidObjectId(commentId)){
         throw new ApiError(400, 'Invalid comment')
     }
-    const deleteComment = await Comment.findByIdAndDelete(req?.params?.commentId)
+    const deleteComment = await Comment.findOneAndDelete({
+        _id:commentId,
+        owner:req?.user?._id
+    })
     if(!deleteComment){
         throw new ApiError(404,'comment cannot found')
     } 
