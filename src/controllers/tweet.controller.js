@@ -22,29 +22,28 @@ const createTweet = asyncHandler(async (req, res) => {
 )
     const createdTweet =  await Tweet.findById(createTweet._id)
     if(!createdTweet){
-        throw new ApiError(500, "Error fetching user's tweet")
+        throw new ApiError(500, "failed to create tweet")
     }
-    return res.status(201).json(new ApiResponse(201, createdTweet, 'You tweeted '))
+    return res.status(201).json(new ApiResponse(201, createdTweet, 'tweet created successfully '))
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
-    if(!isValidObjectId(req.params.userId)){
+    const {userId}= req.params
+    if(!isValidObjectId(userId)){
        throw new ApiError(400, "Invalid user ID")
     }
-    const findTweets = await Tweet.find({
-        owner: req.params.userId
+    const tweets = await Tweet.find({
+        owner: userId
     })
-    if(findTweets.length === 0){
-        throw new ApiError(200, "Haven't tweet yet")
-    }
-    const totalTweetsCount = findTweets.length
-
+    .sort({
+            createdAt:-1
+        })
     return res.status(200).json(new ApiResponse(200, 
          {
-            tweets:findTweets, 
-            count:totalTweetsCount
+            tweets, 
+            count:tweets.length
         },
-         'Tweets fetched successfully'))
+        tweets.length ? 'Tweets fetched successfully' : 'This user has not tweeted yet'))
 
 })
 
