@@ -71,21 +71,30 @@ const addComment = asyncHandler(async (req, res) => {
 const updateComment = asyncHandler(async (req, res) => {
  const {content}=req.body
  const {commentId}=req.params
- if(!content){
-    throw new ApiError(404,'Content not found')
+ if(!content.trim()){
+    throw new ApiError(400,'Content not found')
  }
  if(!isValidObjectId(commentId)){
     throw new ApiError(400, 'Invalid comment')
  }
  
- const updateComment = await Comment.findByIdAndUpdate(req?.params?.commentId, {
-    $set: {
-        content
-    }
- }, {new:true})
+ const updateComment = await Comment.findOneAndUpdate(
+        {
+            _id: commentId,
+            owner:req.user._id
+        },
+        {
+            set:{ 
+                content : content.trim()
+            }
+        },
+        {
+            new:true,
+            runValidators:true
 
+        })
  if(!updateComment){
-    throw new ApiError(500, 'Server down')
+    throw new ApiError(404, 'comment not found')
  }
  
  return res.status(200).json(new ApiResponse(200, updateComment,'Comment updated'))
