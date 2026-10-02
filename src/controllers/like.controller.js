@@ -1,4 +1,4 @@
-import {isValidObjectId} from "mongoose"
+import mongoose, {isValidObjectId} from "mongoose"
 import {Like} from "../models/like.model.js"
 import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
@@ -103,6 +103,29 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
+  
+    const likedVidoes = await Like.aggregate([
+        {
+            $match: {
+                likedBy:req?.user?._id
+            }
+        },
+        {
+            $lookup:{
+                from:'videos',
+                localField:'video',
+                foreignField:'_id',
+                as:'likedVideos'
+            }
+        },
+        {
+             $unwind: "$likedVideos"
+        },
+        {
+            $replaceWith: "$likedVideos"
+        }
+    ])
+      return res.status(200).json(new ApiResponse(200,likedVidoes,"Liked videos fetched successfully"))
 })
 
 export {toggleCommentLike,toggleTweetLike,toggleVideoLike,getLikedVideos}
