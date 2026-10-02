@@ -44,7 +44,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         throw new ApiError(400,'CommentId is requierd')
     }
     if(!isValidObjectId(commentId)){
-        throw new ApiError('Invaid commentId')
+        throw new ApiError(400,'Invaid commentId')
     }
     const comment = await Comment.findById(commentId)
     if(!comment){
@@ -65,7 +65,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         comment:commentId,
         likedBy:req?.user?._id
         })
-        return res.status(200).json(new ApiResponse(200,{},'delete like '))
+        return res.status(200).json(new ApiResponse(200,{},'unlike comment '))
     }
 
 })
@@ -91,13 +91,13 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
         tweet:tweetId,
         likedBy:req?.user?._id 
         })
-        return res.status(201).json(201,like,'Tweet liked')
+        return res.status(201).json(new ApiResponse(201,like,'Tweet liked'))
     }
     await Like.deleteOne({
         tweet:tweetId,
         likedBy:req?.user?._id
     })
-    return res.status.json(new ApiResponse(200,{},'tweet like deleted'))
+    return res.status(200).json(new ApiResponse(200,{},'tweet unlike'))
 }
 )
 
