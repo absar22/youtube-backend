@@ -31,11 +31,10 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     if(!isValidObjectId(userId)){
         throw new ApiError(400,'Invalid userID')
     }
-    const userPlaylist = await Playlist.find({owner:userId})
-    // if(userPlaylist.length === 0){
-    //     throw new ApiError(404,'No playlist for this user')
-    // }
-    return res.status(200).json(new ApiResponse(200,userPlaylist,'User playlist fetcched successfully'))
+    const userPlaylist = await Playlist.find({owner:userId}).sort({createdAt:-1})
+    return res.status(200)
+    .json(new ApiResponse(200,userPlaylist, userPlaylist.length ? 
+        'User playlist fetcched successfully':'This user has not created playlist yet'))
 })
 
 const getPlaylistById = asyncHandler(async (req, res) => {
@@ -47,10 +46,9 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         throw new ApiError(400,'Invalid PlaylistId')
     }
     const playlist = await Playlist.findById(playlistId)
-    if(!playlist){
-        throw new ApiError(404,'No Playlist')
-    }
-    return res.status(200).json(new ApiResponse(200,playlist,'Playlist by Id fetched successfully'))
+    return res.status(200).json(new ApiResponse(200,playlist, playlist.length ?'Playlist by Id fetched successfully'
+         : 'No playlist created'
+    ))
 
 })
 
@@ -63,11 +61,21 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     if(!isValidObjectId(playlistId) || !isValidObjectId(videoId)){
         throw new ApiError(400,'No valid Id')
     }
-    const addVideo = await Playlist.findByIdAndUpdate(playlistId,{
-          $addToSet: { // addtoSet is basical if not persendt then only add not liek $push
-            videos:videoId
-          }
-    },{new:true})
+    const addVideo = await Playlist.findOneAndUpdate(
+        {
+            _id:playlistId,
+            owner:req.user._id
+        },
+        {
+            $addToSet: {
+                videos:videoId
+            }
+        },
+        {
+            new:true,
+            runValidators:true
+        }
+    )
     if(!addVideo){
         throw new ApiError(404,'Video Not found')
     }
@@ -82,11 +90,21 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     if(!isValidObjectId(playlistId) || !isValidObjectId(videoId)){
         throw new ApiError(400,'Invalid playlist or video Id')
     }
-    const deleteVideo = await Playlist.findByIdAndUpdate(playlistId,{
-        $pull: {
-            videos:videoId
+    const deleteVideo = await Playlist.findOneAndUpdate(
+        {
+            _id:playlistId,
+            owner:req.user._id
+        },
+        {
+            $pull: {
+                videos:videoId
+            }
+        },
+        {
+            new:true,
+            runValidators:true
         }
-    })
+    )
     if(!deleteVideo){
         throw new ApiError(404,'Video not found')
     }
@@ -101,7 +119,12 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     if(!isValidObjectId(playlistId)){
         throw new ApiError(400,'Invalid PlaylistId')
     }
-    const deletePlaylist = await Playlist.findByIdAndDelete(playlistId)
+    const deletePlaylist = await Playlist.findOneAndDelete(
+        {
+            _id:playlistId,
+            owner:req.user._id
+        }
+    )
     if(!deletePlaylist){
         throw new ApiError(404,'Cannot delete Playlist')
     }
@@ -118,15 +141,25 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     if(!isValidObjectId(playlistId)){
         throw new ApiError(400,'Invalid PlaylistId')
     }
-    if(!name || !description){
+    if(!name.trim() || !description.trim()){
         throw new ApiError(400,'All fields required')
     }
-    const update = await Playlist.findByIdAndUpdate(playlistId, {
-        $set: {
-            name,
-            description
-        }
-    },{new:true})
+    const update = await Playlist.findOneAndUpdate(
+         {
+            _id:playlistId,
+            owner:req.user._id
+         },
+         {
+            $set: {
+                name:name.trim(),
+                description:description.trim()
+            }
+         },
+         {
+            new:true,
+            runValidators:true
+         }
+    )
     if(!update){
         throw new ApiError(404,'error updating playlist')
     }
