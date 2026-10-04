@@ -17,8 +17,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if([title,description].some((fields) => fields?.trim() === '')){
         throw new ApiError(400,'All feilds are requied')
     }
-    const videoLocalPath = req?.files?.videoFile[0]?.path
-    const thumbnailLocalPath = req?.files?.thumbnail[0]?.path
+    const videoLocalPath = req?.files?.videoFile?.[0]?.path
+    const thumbnailLocalPath = req?.files?.thumbnail?.[0]?.path
 
       if (!videoLocalPath || !thumbnailLocalPath) {
         throw new ApiError(400, 'Video and thumbnail are required')
@@ -139,6 +139,9 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         throw new ApiError(400,'Invalid videoID')
     }
     const video = await Video.findById(videoId)
+    if(!video){
+        throw new ApiError(404,'video not found')
+    }
     video.isPublished = !video.isPublished   
     await video.save()
 
