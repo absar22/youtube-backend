@@ -69,6 +69,9 @@ const getVideoById = asyncHandler(async (req, res) => {
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const {title, description} = req.body
+    if(!title.trim() || !description.trim()){
+        throw new ApiError(400,'All fields are required')
+    }
     if(!videoId){
         throw new ApiError(400,'VideoId is required')
     }
@@ -88,16 +91,26 @@ const updateVideo = asyncHandler(async (req, res) => {
     if(!thumbnail.secure_url || !thumbnail.public_id){
         throw new ApiError(400, 'Cannot upload thumbnail')
     }
-    const updateVideo = await Video.findByIdAndUpdate(videoId, {
-        $set: {
-            title,
-            description,
+    const updateVideo = await Video.findOneAndUpdate(
+          {
+            _id:videoId,
+            owner:req.user._id
+          },
+         {
+             $set: {
+            title:title.trim(),
+            description:description.trim(),
             thumbnail: {
                 url:thumbnail.secure_url,
                 publicId:thumbnail.public_id
             }
+        },
+         },
+        {
+            new:true,
+            runValidators:true
         }
-    },{new:true})
+      )
     if(!updateVideo){
         throw new ApiError(404,'Video not found')
     }
@@ -116,7 +129,16 @@ const deleteVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400,'Invalid videoId')
     }
     
-    const video = await Video.findByIdAndDelete(videoId)
+    const video = await Video.findOneAndDelete(
+        {
+            _id:videoId,
+            owner:req.user._id
+        },
+        {
+            new:true,
+            runValidators:true
+        }
+    )
     if(!video){
         throw new ApiError(404,'Video not found')
     }
@@ -138,7 +160,12 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     if(!isValidObjectId(videoId)){
         throw new ApiError(400,'Invalid videoID')
     }
-    const video = await Video.findById(videoId)
+    const video = await Video.findOne(
+        {
+            _id:videoId,
+            owner:req.user._id
+        }
+    )
     if(!video){
         throw new ApiError(404,'video not found')
     }
