@@ -11,8 +11,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'All fields required')
     }
     const playlist = await Playlist.create({
-        name,
-        description,
+        name:name.trim(),
+        description:description.trim(),
         videos: [],
         owner: req?.user?._id
     })
@@ -78,7 +78,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
         }
     )
     if(!addVideo){
-        throw new ApiError(404,'Video Not found')
+        throw new ApiError(404,'playlist Not found')
     }
     return res.status(200).json(new ApiResponse(200,addVideo,'Video added successfully'))
 })
