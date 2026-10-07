@@ -19,6 +19,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
      }
 
      const skip = (page - 1)* limit
+     
 
      const getVideos = await Video.aggregate([
         {
@@ -62,6 +63,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
             $limit:Number(limit)
         }
      ])
+      if(!getVideos || getVideos.length === 0) {
+        throw new ApiError(404,'No videos found')
+      }
+     return res.status(200).json(new ApiResponse(200,getVideos,'Videos fetched successfully'))
     
 })
 
