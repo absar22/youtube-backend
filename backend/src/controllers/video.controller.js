@@ -18,11 +18,48 @@ const getAllVideos = asyncHandler(async (req, res) => {
          throw new ApiError(400,'Invalid UserId')
      }
 
+     const skip = (page - 1)* limit
+
      const getVideos = await Video.aggregate([
         {
             $match: {
                 owner:new mongoose.Types.ObjectId(userId)
             }
+        },
+        {
+            $lookup: {
+                from:'users',
+                localField:'owner',
+                foreignField:'_id',
+                as:'ownerDetails'
+            }
+        },
+        {
+            $unwind: '$ownerDetails'
+        },
+        {
+            $project: {
+                title: 1,
+                description: 1,
+                thumbnail: 1,
+                views: 1,
+                createdAt: 1,
+                updatedAt:1,
+                "ownerDetails.username": 1,
+                "ownerDetails.fullname": 1,
+                "ownerDetails.avatar": 1
+            }
+        },
+        {
+            sort:{
+                createdAt: -1
+            }
+        },
+        {
+            $skip: skip
+        },
+        {
+            $limit:Number(limit)
         }
      ])
     
