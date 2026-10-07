@@ -38,6 +38,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
             $unwind: '$ownerDetails'
         },
         {
+            $sort:{
+                createdAt: -1
+            }
+        },
+        {
             $project: {
                 title: 1,
                 description: 1,
@@ -48,11 +53,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 "ownerDetails.username": 1,
                 "ownerDetails.fullname": 1,
                 "ownerDetails.avatar": 1
-            }
-        },
-        {
-            sort:{
-                createdAt: -1
             }
         },
         {
