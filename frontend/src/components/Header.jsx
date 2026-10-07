@@ -15,7 +15,7 @@ function Header() {
             <a href="/logout" className="hover:bg-zinc-700 font-semibold text-gray-300">Logout</a>
           </>
         ) : (
-          <a href="/login" className="hover:bg-zinc-700 font-semibold text-gray-300">Sign In</a>
+          <a href="/Login" className="hover:bg-zinc-700 font-semibold text-gray-300">Sign In</a>
         )}
       </nav>
     </header>

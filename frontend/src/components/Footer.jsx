@@ -2,12 +2,34 @@
 function Footer() {
   const currentYear = new Date().getFullYear();
   return (
-    <footer className="bg-gray-800 text-white py-4">
-      <p className="font-bold text-center">© {currentYear} Absar Ahmad</p>
-      <div className="flex gap-4 justify-center">
-        <a href="#">GitHub</a>
-        <a href="#">LinkedIn</a>
-        <a href="#">Twitter</a>
+      <footer className="bg-white dark:bg-black w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            © {currentYear} AbsarAhmad. All rights reserved.
+          </p>
+
+          <div className="flex items-center gap-6">
+            <a
+              href="#"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            >
+              Privacy
+            </a>
+            <a
+              href="#"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            >
+              Terms
+            </a>
+            <a
+              href="#"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            >
+              Contact
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
   );
