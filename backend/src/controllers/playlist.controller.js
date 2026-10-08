@@ -47,7 +47,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     }
     const playlist = await Playlist.findById(playlistId)
     if(!playlist){
-        throw new ApiError(401,'No playlist found')
+        throw new ApiError(400,'No playlist found')
     }
     return res.status(200).json(new ApiResponse(200, playlist, 'Playlist by Id fetched successfully'))
 
