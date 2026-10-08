@@ -105,7 +105,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     const {page = 1,limit = 10} =req.params
     const pageNumber = Number(page)
     const limitNumber = Number(limit)
-    if(isNaN(pageNumber) || isNaN(limitNumber)){
+    if(!Number.isInteger(pageNumber) ||pageNumber < 1 || !Number.isInteger(limitNumber) ||limitNumber < 1){
         throw new ApiError(400,'Invalid page or limit number')
     }
     const skip = (pageNumber - 1) * limitNumber
