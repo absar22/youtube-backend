@@ -35,7 +35,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
     }
     const pageNumber = Number(page)
     const limitNumber = Number(limit)
-    if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber){
+    if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
       throw new ApiError(400,'Invalid page or limit number')
     }
     const skip = (pageNumber - 1) * limitNumber
