@@ -142,7 +142,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     if(!isValidObjectId(playlistId)){
         throw new ApiError(400,'Invalid PlaylistId')
     }
-    if(!name.trim() || !description.trim()){
+    if(!name?.trim() || !description?.trim()){
         throw new ApiError(400,'All fields required')
     }
     const update = await Playlist.findOneAndUpdate(
