@@ -39,6 +39,16 @@ const getVideoComments = asyncHandler(async (req, res) => {
                $unwind: '$ownerDetails'
            },
            {
+               $project: {
+                   content: 1,
+                   createdAt: 1,
+                   updatedAt: 1,
+                   "ownerDetails.username": 1,
+                   "ownerDetails.fullname": 1,
+                   "ownerDetails.avatar": 1
+               }
+           },
+           {
             $skip:skip
            },
            {
