@@ -102,15 +102,13 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 )
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-    const {page,limit} =req.params
-    if(!isValidObjectId(page)){
-        throw new ApiError(400,'Invalid page number')
+    const {page = 1,limit = 10} =req.params
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
+    if(isNaN(pageNumber) || isNaN(limitNumber)){
+        throw new ApiError(400,'Invalid page or limit number')
     }
-    if(!isValidObjectId(limit)){
-        throw new ApiError(400,'Invalid limit number')
-    }
-
-    const skip = (page - 1) * limit
+    const skip = (pageNumber - 1) * limitNumber
 
     const likedVideos = await Like.aggregate([
         {
@@ -119,10 +117,15 @@ const getLikedVideos = asyncHandler(async (req, res) => {
             }
         },
         {
+            $sort: {
+                createdAt: -1
+            }
+        },
+        {
             $skip:skip
         },
         {
-            $limit: Number(limit)
+            $limit: limitNumber
         },
  
         {
