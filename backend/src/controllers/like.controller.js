@@ -102,14 +102,29 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 )
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-    //TODO: get all liked videos
-  
-    const likedVidoes = await Like.aggregate([
+    const {page,limit} =req.params
+    if(!isValidObjectId(page)){
+        throw new ApiError(400,'Invalid page number')
+    }
+    if(!isValidObjectId(limit)){
+        throw new ApiError(400,'Invalid limit number')
+    }
+
+    const skip = (page - 1) * limit
+
+    const likedVideos = await Like.aggregate([
         {
             $match: {
                 likedBy:req?.user?._id
             }
         },
+        {
+            $skip:skip
+        },
+        {
+            $limit: Number(limit)
+        },
+ 
         {
             $lookup:{
                 from:'videos',
@@ -123,9 +138,9 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         },
         {
             $replaceWith: "$likedVideos"
-        }
+        },
     ])
-      return res.status(200).json(new ApiResponse(200,likedVidoes,"Liked videos fetched successfully"))
+      return res.status(200).json(new ApiResponse(200,likedVideos,"Liked videos fetched successfully"))
 })
 
 export {toggleCommentLike,toggleTweetLike,toggleVideoLike,getLikedVideos}
