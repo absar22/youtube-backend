@@ -100,7 +100,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
         description,
     })
 
-    const publisedVideo = await Video.findById(publishVideo._id)
+    const publisedVideo = await Video.findOne(
+        {
+            _id:publishVideo._id,
+            owner:req.user._id
+        }
+    )
     if(!publisedVideo){
         throw new ApiError(500, 'Error publishing video')
     }
