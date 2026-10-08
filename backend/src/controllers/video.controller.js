@@ -17,8 +17,14 @@ const getAllVideos = asyncHandler(async (req, res) => {
      if(!isValidObjectId(userId)){
          throw new ApiError(400,'Invalid UserId')
      }
+     const pageNumber = Number(page)
+     const limitNumber = Number(limit)
 
-     const skip = (page - 1)* limit
+     if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
+        throw new ApiError(400,'Invalid page or limit number')
+     }
+
+     const skip = (pageNumber - 1)* limitNumber
      
 
      const getVideos = await Video.aggregate([
@@ -60,7 +66,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             $skip: skip
         },
         {
-            $limit:Number(limit)
+            $limit:limitNumber
         }
      ])
       if(!getVideos || getVideos.length === 0) {
