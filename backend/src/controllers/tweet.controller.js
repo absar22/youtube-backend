@@ -29,15 +29,22 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     const {userId}= req.params
+    const {page,limit} = req.query
     if(!isValidObjectId(userId)){
        throw new ApiError(400, "Invalid user ID")
     }
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
+    if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber){
+      throw new ApiError(400,'Invalid page or limit number')
+    }
+    const skip = (pageNumber - 1) * limitNumber
     const tweets = await Tweet.find({
         owner: userId
     })
     .sort({
             createdAt:-1
-        })
+        }).skip(skip).limit(limitNumber)
     return res.status(200).json(new ApiResponse(200, 
          {
             tweets, 

@@ -102,7 +102,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 )
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-    const {page = 1,limit = 10} =req.params
+    const {page = 1,limit = 10} =req.query
     const pageNumber = Number(page)
     const limitNumber = Number(limit)
     if(!Number.isInteger(pageNumber) ||pageNumber < 1 || !Number.isInteger(limitNumber) ||limitNumber < 1){
