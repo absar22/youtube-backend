@@ -178,7 +178,7 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
 const changeCurrentPassword = asyncHandler(async(req,res) => {
   const {oldPassword,newPassword, confirmNewPassword} = req.body
   if(newPassword !== confirmNewPassword){
-    throw new ApiError(404, 'New password and confirm password do not match')
+    throw new ApiError(400, 'New password and confirm password do not match')
   }
 //    just because we want to change the password i am assuming you are logged in so we get req.user from auth middleware
      const user = await User.findById(req?.user?._id)
