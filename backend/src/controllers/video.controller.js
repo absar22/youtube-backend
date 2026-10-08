@@ -34,6 +34,17 @@ const getAllVideos = asyncHandler(async (req, res) => {
             }
         },
         {
+            $sort:{
+                createdAt: -1
+            }
+        },
+        {
+            $skip: skip
+        },
+        {
+            $limit:limitNumber
+        },
+        {
             $lookup: {
                 from:'users',
                 localField:'owner',
@@ -43,11 +54,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
         },
         {
             $unwind: '$ownerDetails'
-        },
-        {
-            $sort:{
-                createdAt: -1
-            }
         },
         {
             $project: {
@@ -62,12 +68,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 "ownerDetails.avatar": 1
             }
         },
-        {
-            $skip: skip
-        },
-        {
-            $limit:limitNumber
-        }
      ])
       if(!getVideos || getVideos.length === 0) {
         throw new ApiError(404,'No videos found')
