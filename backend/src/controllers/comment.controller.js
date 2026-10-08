@@ -14,8 +14,13 @@ const getVideoComments = asyncHandler(async (req, res) => {
     if(!isValidObjectId(videoId)){
         throw new ApiError(400,'Invalid videoId')
     }
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
+    if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
+        throw new ApiError(400,'Invalid page or limit number')
+    }
     //  pagination formula
-    const skip = (page - 1) * limit
+    const skip = (pageNumber - 1) * limitNumber
     const comments = await Comment.aggregate(
         [
             {
@@ -52,7 +57,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
             $skip:skip
            },
            {
-            $limit: Number(limit)
+            $limit: limitNumber
            }
         ]
     )
