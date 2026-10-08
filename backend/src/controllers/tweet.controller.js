@@ -29,7 +29,7 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     const {userId}= req.params
-    const {page,limit} = req.query
+    const {page = 1,limit = 10} = req.query
     if(!isValidObjectId(userId)){
        throw new ApiError(400, "Invalid user ID")
     }

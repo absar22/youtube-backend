@@ -39,12 +39,19 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {channelId} = req.params
+    const {page=1,limit=10} = req.query
     if(!channelId){
         throw new ApiError(400,'channelId required')
     }
     if(!isValidObjectId(channelId)){
         throw new ApiError(400,'Invalid ChannelId')
     }
+    const pageNumber = Number(page)
+    const limitNumber = Number(page)
+    if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
+     throw new ApiError(400,'Invalid page or limit number')
+    }
+    const skip = (pageNumber - 1) * limitNumber
     const channel = await User.findById(channelId).select('_id')
 
         if (!channel) {
@@ -56,6 +63,17 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
             $match: {
                   channel:new mongoose.Types.ObjectId(channelId)
             }
+        },
+        {
+            $sort: {
+                createdAt:-1
+            }
+        },
+        {
+          $skip:skip
+        },
+        {
+            $limit:limitNumber
         },
         {
             $lookup: {
@@ -79,12 +97,19 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params
+    const {page= 1, limit = 10} = req.query
     if(!subscriberId){
         throw new ApiError(400,'SubscribedId is required')
     }
     if(!isValidObjectId(subscriberId)){
         throw new ApiError(400,'Invalid SubscribedID')
     }
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
+    if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
+        throw new ApiError(400,'Invalid page or limit number')
+    }
+    const skip = (pageNumber - 1) * limitNumber
     const subscriberList = await Subscription.aggregate([
         {
             $match: {
@@ -106,6 +131,12 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
             $sort:{
                 createdAt: -1
             }
+        },
+        {
+           $skip:skip
+        },
+        {
+          $limit:limitNumber
         },
         {
             $project: {
