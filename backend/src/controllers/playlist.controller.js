@@ -129,7 +129,8 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     if(!deletePlaylist){
         throw new ApiError(404,'Cannot delete Playlist')
     }
-    return res.status(200).json(new ApiResponse(200,{},'Playlist Deleted Successfully'))
+    // return res.status(200).json(new ApiResponse(200,{},'Playlist Deleted Successfully'))
+    return res.status(204).send()
 })
 
 

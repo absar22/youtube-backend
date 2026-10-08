@@ -108,6 +108,9 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     if(!Number.isInteger(pageNumber) ||pageNumber < 1 || !Number.isInteger(limitNumber) ||limitNumber < 1){
         throw new ApiError(400,'Invalid page or limit number')
     }
+       if(limitNumber > 100){
+            throw new ApiError(400,'Limit number cannot exceed 100')
+        }
     const skip = (pageNumber - 1) * limitNumber
 
     const likedVideos = await Like.aggregate([

@@ -38,6 +38,9 @@ const getUserTweets = asyncHandler(async (req, res) => {
     if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
       throw new ApiError(400,'Invalid page or limit number')
     }
+       if(limitNumber > 100){
+            throw new ApiError(400,'Limit number cannot exceed 100')
+        }
     const skip = (pageNumber - 1) * limitNumber
     const tweets = await Tweet.find({
         owner: userId
@@ -97,7 +100,8 @@ const deleteTweet = asyncHandler(async (req, res) => {
     if(!deleteTweet){
         throw new ApiError(404, 'No tweet found')
     }
-    return res.status(200).json(new ApiResponse(200, {}, 'Tweet deleted'))
+    // return res.status(200).json(new ApiResponse(200, {}, 'Tweet deleted'))
+    return res.status(204).send()
 })
 
 export {createTweet,getUserTweets,updateTweet,deleteTweet}

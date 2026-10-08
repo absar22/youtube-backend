@@ -47,10 +47,13 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
         throw new ApiError(400,'Invalid ChannelId')
     }
     const pageNumber = Number(page)
-    const limitNumber = Number(page)
+    const limitNumber = Number(limit)
     if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
      throw new ApiError(400,'Invalid page or limit number')
     }
+       if(limitNumber > 100){
+            throw new ApiError(400,'Limit number cannot exceed 100')
+        }
     const skip = (pageNumber - 1) * limitNumber
     const channel = await User.findById(channelId).select('_id')
 
@@ -109,23 +112,15 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
         throw new ApiError(400,'Invalid page or limit number')
     }
+       if(limitNumber > 100){
+            throw new ApiError(400,'Limit number cannot exceed 100')
+        }
     const skip = (pageNumber - 1) * limitNumber
     const subscriberList = await Subscription.aggregate([
         {
             $match: {
                 subscriber:new mongoose.Types.ObjectId(subscriberId)
             }
-        },
-        {
-            $lookup: {
-                from:'users',
-                localField:'channel',
-                foreignField:'_id',
-                as:'usersChannelInfo'
-            }
-        },
-        {
-            $unwind: '$usersChannelInfo'
         },
         {
             $sort:{
@@ -137,6 +132,17 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         },
         {
           $limit:limitNumber
+        },
+        {
+            $lookup: {
+                from:'users',
+                localField:'channel',
+                foreignField:'_id',
+                as:'usersChannelInfo'
+            }
+        },
+        {
+            $unwind: '$usersChannelInfo'
         },
         {
             $project: {

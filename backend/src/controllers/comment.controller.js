@@ -19,6 +19,9 @@ const getVideoComments = asyncHandler(async (req, res) => {
     if(!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1){
         throw new ApiError(400,'Invalid page or limit number')
     }
+    if(limitNumber > 100){
+        throw new ApiError(400,'Limit number cannot exceed 100')
+    }
     //  pagination formula
     const skip = (pageNumber - 1) * limitNumber
     const comments = await Comment.aggregate(
@@ -142,7 +145,8 @@ const deleteComment = asyncHandler(async (req, res) => {
         throw new ApiError(404,'comment cannot found')
     } 
        
-    return res.status(200).json(new ApiResponse(200, {}, 'Comment deleted'))
+    // return res.status(200).json(new ApiResponse(200, {}, 'Comment deleted'))
+    return res.status(204).send()
 })
 
 export {getVideoComments, addComment, updateComment,deleteComment}
