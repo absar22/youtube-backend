@@ -43,7 +43,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
         throw new ApiError(400,'PlaylistId is required')
     }
     if(!isValidObjectId(playlistId)){
-        throw new ApiError(400,'Invalid PlaylistId')
+        throw new ApiError(404,'Invalid PlaylistId')
     }
     const playlist = await Playlist.findById(playlistId)
     if(!playlist){
