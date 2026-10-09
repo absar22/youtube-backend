@@ -11,16 +11,8 @@ const getChannelStats = asyncHandler(async (req, res) => {
     const channel = await Subscription.aggregate([
         {
             $match: {
-                channel : new mongoose.Types.ObjectId(req.user._id)
+                channel: new mongoose.Types.ObjectId(req.user._id)
             }
-        },
-        {
-          $lookup: {
-              from:'videos',
-              localField:'channel',
-              foreignField:'owner',
-              as:'videos'
-          } 
         }
     ])
 })
