@@ -13,6 +13,65 @@ const getChannelStats = asyncHandler(async (req, res) => {
             $match: {
                 channel: new mongoose.Types.ObjectId(req.user._id)
             }
+        },
+        {
+            $lookup: {
+                from:'Videos',
+                localField:'channel',
+                foreignField:'channel',
+                as:'videos',
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: 'users',
+                            localField: 'owner',
+                            foreignField: '_id',
+                            as: 'owner',
+                            pipeline: [
+                                {
+                                    $project: {
+                                        _id: 1,
+                                        name: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },{
+                        $addFields: {
+                            totalViews: {
+                                $sum: '$videos.views'
+                            },
+                            totalLikes: {
+                                $sum: '$videos.likes'
+                            },
+                            totalComments: {
+                                $sum: '$videos.comments'
+                            },
+                            totalVideos: {
+                                $size: '$videos'
+                            }
+                        }
+                    },{
+                        $addFields: {
+                            totalSubscribers: {
+                                $size: '$subscribers'
+                            }
+                        }
+                    },{
+                        $project: {
+                            _id: 1,
+                            name: 1,
+                            avatar: 1,
+                            totalViews: 1,
+                            totalLikes: 1,
+                            totalComments: 1,
+                            totalVideos: 1,
+                            totalSubscribers: 1
+                        }
+                    }
+                ]
+            }
         }
     ])
 })
